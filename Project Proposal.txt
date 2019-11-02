@@ -1,0 +1,44 @@
+Project Proposal
+
+Basic Info: 
+	Title: Movie Guru
+	Team Members: Jason Shin, Alex Dougherty , Yayan Zhao
+	https://github.com/shinjh2/cs3891-project
+
+Background and Motivation: 
+To be able to apply maps, multiple views and such visualization techniques into for life applications usable by the typical person. 
+In the case of our project, to supply the user with movie recommendations.
+
+Objectives: 
+Our project’s problem of interest is how to make good movie recommendations. The goal of the visualization will thus be to find 
+trends among popular movies and to determine recommendations based off of certain film attributes. We hope to learn how to use 
+transitions effectively so the user can determine his own qualifications to base his/her recommendation off of. 
+
+Data: We are using the csv file from the following link: https://www.kaggle.com/tmdb/tmdb-movie-metadata/download. From the dataset 
+we will parse through the desired attributes such as genre, rating, etc..
+
+Data Processing: Data processing should not be time consuming as the CSV file above contains all of the attributes we are searching for. 
+As we parse through the file, we just need to capture the desired attributes which will be: Title, Revenue, Director, Date, Rating, 
+Genre and Country.
+
+Must-Have Features: One necessary feature is for the user to be able to enter in his/her own movie attribute values to build movie
+ recommendations off of. For example if the user is looking for romance movies rated PG, then the visualization would utilize only 
+movies fitting those characteristics. Another desirable feature is to show the distribution of movies among countries, which can be 
+done by utilizing a map and a luminance key. We also want a graph that the user can look at to see all of the current movies fitting 
+the desired attributes, which will transition into different points depending on the user entered attribute values. 
+
+Optional Features: Optional features would be additional graph views depicting the relationships between two different film attributes 
+so the user can see more patterns present among his chosen attribute values. For example, even if the user enters romance movies rated 
+PG, a graph showing the relationship between directors and the revenue and directory could show which more interesting patterns among 
+the user’s chosen selection which could affect his movie recommendation choice. 
+
+Project Schedule:
+The following coding goals will be met by each of us working on the repo on alternate days, and then meeting on the weekend to 
+go over what has been accomplished and fixing any bugs we found together. 
+
+Week of November 4th: Goal: Finishing data wrangling	
+Week of November 11: Goal: Finish menu and map visualization.
+Week of November 18 Goal: Finish scatter plot visualization
+Week of November 25:  Finish transitions 
+Week of December 2: Fix any bugs and plan presentation. 
+Visualization Design:  
