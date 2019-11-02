@@ -41,4 +41,5 @@ Week of November 11: Goal: Finish menu and map visualization.
 Week of November 18 Goal: Finish scatter plot visualization
 Week of November 25:  Finish transitions 
 Week of December 2: Fix any bugs and plan presentation. 
-Visualization Design:  
+
+Visualization Design: Look at attached png files design_1, design_2, design_3
