@@ -1,3 +1,4 @@
+  
 <!DOCTYPE html>
 <html lang='en'>
 	<head>
@@ -8,11 +9,26 @@
 	<body>
 	<script type='text/javascript' src='movieproject.js'></script>
 	<script type='text/javascript'>
-		d3.csv('tmdb_5000_movies.csv')
+		d3.csv('tmdb_5000_movies.csv',function(d){
+			return{
+				id: +d.id,
+				title:d.title,
+				date: d.release_date,
+				genres: d.genres,
+				budget: +d.budget,
+				revenue: +d.revenue,
+				country: d.production_countries,
+				company: d.production_companies,
+				rate: +d.vote_average				
+			};
+		})
+  		// d3.csv('tmdb_5000_movies.csv')
 		  .then(function(data)  {
-			  movie_data = data;
+			  movie_data = data
+			  // console.log(movie_data[0]);
 			  plot_it();
-		  })
+		  });
 	</script>
 	</body>
 </html>
+
