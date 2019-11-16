@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta charset='utf-8'>
+		<title>Final Movie Dataset Project</title>
+		<script type='text/javascript' src='../d3.js'></script>
+	</head>
+	<body>
+	<script type='text/javascript' src='movieproject.js'></script>
+	<script type='text/javascript'>
+		d3.csv('tmdb_5000_movies.csv')
+		  .then(function(data)  {
+			  movie_data = data;
+			  plot_it();
+		  })
+	</script>
+	</body>
+</html>
