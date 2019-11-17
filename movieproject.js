@@ -1,136 +1,102 @@
-function create_dom_element(element_name)  {
-	return document.createElementNS('http://www.w3.org/2000/svg', element_name);
-}
+//Email I got from Berger about our vis:
 
-function get_single_element_by_name(element_name)  {
-	return document.getElementsByTagName(element_name)[0];
-}
+//Hi Jason,
+//
+// Just to briefly follow up our discussion, as I was a bit crunched for time earlier:
+//
+// It is worth separating the independent attributes in the movies data from the dependent attributes.
+// Independent attributes, here, means aspects of movies that are not measured, e.g. year, director, genre,
+// etc.. whereas dependent attributes are movie gross, ratings, etc..
+//
+// By decoupling these attributes, you can select the independent attributes (through linked, multiple views
+// as we discussed) to then trigger novel views for the dependent attributes (e.g. scatterplot). Now, another
+// thing to consider is how you select: as we discussed brushes across attributes could correspond to intersections.
+// But, you could also consider the union operator for a single attribute, which then highlights those points differently
+// in the scatterplot. For instance, if a user clicks on two bars that correspond to two different genres, then in your
+// scatterplot you could color points differently based on genre. This way, you can compare multiple values within an
+// attribute (e.g. action and comedy), and still filter movies based on the other attribute selections (e.g. limit
+// movies to years 1990-1999).
+//
+// Furthermore, if you'd like to show directors in your plots, one thing you could do is select a small amount of
+// prominent directors (either automatically, or even manually, e.g. Stephen Spielberg, Martin Scorsese, those who have
+// directed a lot of well-known movies), and visually encode movies directed by these people differently in your scatterplot.
+// That way, you can compare movies directed by prominent directors with the rest of the movies.
+//
+// Good luck in putting together the prototype.
+//
+
+
+//function create_dom_element(element_name)  {
+//    return document.createElementNS('http://www.w3.org/2000/svg', element_name);
+//}
+
+//function get_single_element_by_name(element_name)  {
+//    return document.getElementsByTagName(element_name)[0];
+//}
+
+
+
+// I cant get anything to show up on my local host even when i leave the plot_it function blank
+// and leave only a text group, so I cant test how to implement intervals in a rollup
+// first step needs to be to make sure that the stuff even shows up in the first place on the server
+// so we can test if it works as we go.
+
 
 function plot_it()  {
 
-	var width = 1700, height = 1500;
-	var svg_element = get_single_element_by_name('svg');
+	var width = 850, height = 750;
 	d3.select('body').append('svg').attr('width', width).attr('height', height);
 	var pad = 50;
 	var actual_width = width-2*pad, actual_height = height-2*pad;
 
-	/// arrange layout for 5 filters's bar plot
-	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6; // all the 5 bar plots on the left have the same height and width
-	var bar1_y = 0; // country-count bar plot
-	var bar2_y = bar_height+2*pad; // date-count bar plot
-	var bar3_y = bar2_y+2*pad; // budget-count bar plot
-	var bar4_y = bar3_y+2*pad; // revenue-count bar plot
-	var bar5_y = bar4_y+2*pad; // company-count bar plot
-	var scatter_x = bar_width + 3*pad, scatter_y = 0; //rate-genres scatter plot
 
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'country')
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar2_y)+')').attr('id', 'year')
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar3_y)+')').attr('id', 'budget')
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar4_y)+')').attr('id', 'revenue')
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar5_y)+')').attr('id', 'company')
-	d3.select('svg').append('g').attr('transform', 'translate('+(pad+scatter_x)+','+(pad+scatter_y)+')').attr('id', 'rate-genres')
+	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
+	var bar1_y = 0;
+                                                                   ]
+
+    //here our independent bar plots are of budget, coutnry, genre, production companies,
+    //release date. Our dependent scatter plots that are the outcome are of revenue and rating
+    //see Berger's comment as to why this is so
+
+    //challenges:
+    // budget and release date need to be rolled up into intervals
+    // country, genre and production companies are each in arrays that each need to be parsed through
 
 
-	var bar1_scale_x = d3.scaleBand().domain(country).range(0,bar_width) // 71 different countries; build a list of contry here
-	var bar2_scale_x = d3.scaleBand().domain(year).range(0,bar_width) // 91 differenet years
-	var bar3_scale_x = d3.scaleBand().domain(budget).range(0,bar_width) // 31 different budgest
-	var bar4_scale_x = d3.scaleBand().domain(revenue).range(0,bar_width) // 111 different revenues
-	var bar5_scale_x = d3.scaleBand().domain(company).range(0,bar_width) // need to figure out later
-	var scatter_scale_x = d3.scaleBand().domain(genres).range(0,scatter_width) // need to figure out later
-	var scatter_scale_y = d3.scaleLinear().domain(rate).range(0,scatter_height)
+    // only budget has been implemented so far
+
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget')
+
+
 
 /// select attributes we're interested in
 	movie_data.forEach(d => {
-		d.id = +d.id,
-		d.title = d.title,
-		d.date = d.date,
-		d.year = d.date.split('-')[0],
-		d.genres = d.genres,
-		d.budget = +Math.floor(d.budget/Math.pow(10,7)) // divide budget into different range
-		d.revenue = +Math.floor(d.revenue/Math.pow(10,7))
-		d.country = d.country.split(/[,:}]+/)[3], // a list of multiple country for the movie, don't know how to deal with it. here just take the first country.
-		d.company = d.company, // a list of multiple company for the movie
-		d.rate = +d.rate		
+		d.budget = +d.budget;
 	});
-	//console.log(movie_data)
 
 
 /// data for the first 5 filters's plot
-	var nest = d3.nest()
-		.key(function(d){return d.country;})
-		.key(function(d){return d.year;}).sortKeys(d3.ascending)
+	var nested_budget = d3.nest()
 		.key(function(d){return d.budget;}).sortKeys(d3.ascending)
-		.key(function(d){return d.revenue;}).sortKeys(d3.ascending)
-		.key(function(d){return d.company;})
-		.rollup(function(leaves){return leaves.length;}) 
-		// the num of movie for each combination of keys(country,year,budget,revenue,company) are saved as value for each key.
+		.rollup(function(leaves){return leaves.length;})
 		.entries(movie_data)
 
-	console.log(nest)
+
+    var min_budget= d3.min(nested_budget, d => d['key']);
+    var max_budget = d3.max(nested_budget, d => d['key']);
+    var budget_xscale = d3.scaleLinear().domain([min_budget,max_budget]).range([0,bar_width]);
 
 
-// each file might have multiple country, I just take the 1st country. we should solve this problem later.
-	var movieByCountry = d3.nest()
-		.key(function(d){ return d.country;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(movieByCountry); // 71 different countries in total. the num of movies in each country are saved as value for each key
-
-	var countryByYear = d3.nest()
-		.key(function(d){ return d.year;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(countryByYear); // 91 different years in total
-
-	var movieByBudget = d3.nest()
-		.key(function(d){ return d.budget;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(movieByBudget); // 31 different budgets (divided by 10^7, and take Math.floor())
-
-	var movieByRevenue = d3.nest()
-		.key(function(d){ return d.revenue;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(movieByRevenue); // 111 different revenues (divided by 10^7, and take Math.floor())
+    var min_budget_count= d3.min(nested_budget, d => d['value']);
+    var max_budget_count = d3.max(nested_budget, d => d['value']);
+    var budget_yscale = d3.scaleLinear().domain([min_budget_count,max_budget_count]).range([0,bar_height]);
 
 
-// problem: each film might have multiple genres, don't know how to extract all different genres from dataset
-	var movieByGenres = d3.nest()
-		.key(function(d){ return d.genres;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(movieByGenres); 
-
-// problem: same as above, each film might have multiple companies, we need to count +1 for all of these companies
-	var countryByCompany = d3.nest()
-		.key(function(d){ return d.company;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(movie_data);
-	console.log(countryByCompany);
-
-
-//// the final visualization of rate-genres based on all the previous filters user choose
-	var final_scatter = d3.nest()
-		.key(function(d){ return d.rate;})
-		.key(function(d){return d.genres;})
-		.rollup(function(leaves){return leaves.length;})
-		.entries(nest);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    d3.select('budget').selectAll('empty').data(nested_budget).enter().append('g').attr('id', 'budgetme')
+    
+    d3.selectAll('budgetme').selectAll('empty').data(d => d).enter().append('circle')
+             .attr('cx', d => budget_xscale(d['key']))
+             .attr('cy', d => budget_yscale(d['value']))
 
 
 }
