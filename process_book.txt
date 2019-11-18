@@ -1,0 +1,45 @@
+Process Book
+
+Overview and Motivation:
+Our motivation was to be able to apply maps, multiple views and various visualization techniques to applications usable by the typical person. 
+In the case of our project, we wanted to supply the user with movie recommendations.
+
+The goal of the visualization is to find trends among popular movies to determine recommendations based off of certain film attributes. 
+We hope to learn how to use transitions effectively so the user can determine his own qualifications to base his/her recommendation off of.
+
+Related Work: We were motivated by the examples in class of what d3 interactions could do for a visualization and wanted to apply those
+effectively in our own visualization.
+
+Questions: We first had to determine what attributes the user was selecting to determine their selection. We then wanted the user to see any 
+patterns between those attributes effectively to aid them in their selection process. We solved this by creating a menu of independent attributes
+(genre, budget, production company, country, date) that the user can make a selection from, while a scatter outputs the relationship between 
+some of its dependent attributes (revenue, rating). While designing the visualization, we also tried to look for interesting relationships 
+between attributes that were worth making unique views for.
+
+Data: We used data from a csv file containing a list of thousands of movies and our target attributes from kaggle. These attributes were 
+budget, genre, company, country, date produced, revenue and rating. Challenges we went through while data wrangling were accessing all of the 
+values of certain attributes such as genre or company when each movie held several of them contained in a string. 
+
+Implementation: Our design starts with the implementation of a menu of bar plots for each independent movie attribute (genre, budget, produciton 
+company, coutry, date). The y axis of each of these plots hold the count of movies, while the x axis corresponds to each attribute. By continuing to 
+select certain bars of an attribute, the user can see the affect this has on other attributes through a transition, which displays what fraction of the 
+selection are present in the other attributes through a fraction of a bar. The user can reset his selection with a reset button, which undoes any of the
+attribute ranges selected so a new selection can be created. There is also a scatter plot where the y axis contains the range of ratings, while the x 
+axis contains the range of revenue. Through the menu selection, the user can now see all of the movies in the selection in this scatter plot, which also
+displays the relationship between these two dependent attributes. see nextdesign1.png for a sketch of this visualization. 
+
+Exploratory Data Analysis: Visualizations we used to initially look at our data consisted of the bar plots of movie counts of certain attributes.
+Because we found certain attributes such as country or production company contained hundreds of individual values with each a count of 1, this
+influenced our design into creating an "others" category, where all of the extra movies could be bucketed into. 
+
+
+Design Evolution: design_1.png, design2.png, and design3.png show the initial designs for the visualization. These visualizations consisted of 
+a drop down menu which created selections that would build a scatter plot and a map of the movies under that selection. We realized the limiting nature
+of the design because of the limited amount of views and comparions between the attributes that could be made. Because of these insights, our design 
+was altered so the menu consisted of linked bar plots for our attributes, so when users made selections on one bar plot, he could view the impact that 
+selection had on all of the other attributes. This created a much more fluid and interactive design that could potentially inform our user far better. 
+
+Analysis: We've learned of the heavy biases present in our data which means that to produce meaningful visualizations for relationships, 
+our design needs to consider what to do with outliers. We've temporily solved this by treating the outliers as special exceptions that do not
+influence our scale, but further design changes will be made to accomodate them. We could continue to improve our visualization by adding new views 
+such as a map for location that could offer the user new insight of some patterns between attributes that could not be as clearly seen before. 
