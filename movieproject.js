@@ -66,7 +66,7 @@ function plot_it()  {
     // only budget has been implemented so far
 
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget').attr('width', plot_dim).attr('height', plot_dim)
-
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
 
 
 /// select attributes we're interested in
@@ -85,18 +85,59 @@ var budget_scale = d3.scaleQuantize()
 		.rollup(function(leaves){return leaves.length;})
 		.entries(movie_data)
 
+    //unrolled array of genres
+    var genre_types = [];
+    for(var i = 0; i < movie_data.length; i++){
+        var j = 5;
+        while(movie_data[i]['genres'].split('"')[j] != null){
+            genre_types.push(movie_data[i]['genres'].split('"')[j])
+            j += 6;
+        }
+    }
+    console.log(genre_types);
+    //rolled array of genres with counts
+    var nested_genres = d3.nest()
+        .key(function(d){return d;})
+        .rollup(function(leaves){return leaves.length;})
+        .entries(genre_types)
+    console.log(nested_genres);
+
+    //scales for budget
     var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
 
     var max_budget_count = d3.max(nested_budget, d => d['value']);
     var budget_yscale = d3.scaleLinear().domain([0,max_budget_count]).range([plot_dim, 0]);
     console.log(nested_budget);
-    
+
+
+
+    //scales for genre
+    //array of all genre names for band scale
+    var genre_names = [];
+    for(var i = 0; i < nested_genres.length; i++) {
+        genre_names.push(nested_genres[i]['key']);
+    }
+
+    var genre_xscale = d3.scaleBand().domain(genre_names).range([bar_height, 0]);
+
+    var min_genre_count= d3.min(nested_genres, d => d['value']);
+    var max_genre_count = d3.max(nested_genres, d => d['value']);
+    var genre_yscale = d3.scaleLinear().domain([min_genre_count,max_genre_count]).range([0,bar_height]);
+    console.log(nested_genres);
+
     d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
              .attr('x', d => budget_xscale(d['key']))
              .attr('y', function(d) { return budget_yscale(d['value']);})
              .attr('width', budget_xscale.bandwidth())
 	           .attr('height', function(d) { return plot_dim - budget_yscale(d['value']);})
              .attr('fill', "blue")
+
+
+    d3.select('#genre').selectAll('empty').data(nested_genres).enter().append('circle')
+        .attr('cx', d => genre_xscale(d['key']))
+        .attr('cy', d => genre_yscale(d['value']))
+        .attr('r', 5)
+        .attr('fill', "blue")
 
     // X AXIS Y AXIS
     var y_axis = d3.axisLeft(budget_yscale)
