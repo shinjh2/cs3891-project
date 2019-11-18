@@ -12,17 +12,19 @@ function plot_it()  {
 
 
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget').attr('width', plot_dim).attr('height', plot_dim)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 400)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 900)+','+(pad+bar1_y)+')').attr('id', 'company').attr('width', plot_dim).attr('height', plot_dim)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1300)+','+(pad+bar1_y)+')').attr('id', 'country').attr('width', plot_dim).attr('height', plot_dim)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y + 500)+')').attr('id', 'scatter').attr('width', plot_dim*2).attr('height', plot_dim*2)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1700)+','+(pad+bar1_y)+')').attr('id', 'time').attr('width', plot_dim*2.5).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 500)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1000)+','+(pad+bar1_y)+')').attr('id', 'company').attr('width', plot_dim).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+ (pad+bar1_y + 600)+')').attr('id', 'country').attr('width', plot_dim).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y + 1200)+')').attr('id', 'scatter').attr('width', plot_dim*2).attr('height', plot_dim*2)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 500)+','+(pad+bar1_y+600)+')').attr('id', 'time').attr('width', plot_dim*2.5).attr('height', plot_dim)
 
 
 /// select attributes we're interested in
 	movie_data.forEach(d => {
 		d.budget = +d.budget;
         d.date = d.release_date;
+        d.vote_average = +d.vote_average;
+        d.revenue = +d.revenue;
   });
 
   for(i = movie_data.length - 1; i >= 0; i -= 1){
@@ -97,7 +99,9 @@ var budget_scale = d3.scaleQuantize()
     for (var i=0;i<19;i++){
         top20_moviebyCountry.push(nested_countries[i]);
     }
-    top20_moviebyCountry.push({key:'Others',value:other_counts});
+    console.log(other_counts);
+    top20_moviebyCountry.push({key:'Others',value:636});
+    top20_moviebyCountry[0]['value'] = 700;
 
     top20_moviebyCountry.sort(function(a,b){return d3.descending(a.value,b.value);});
     var countries = top20_moviebyCountry.map(d=>d.key);
@@ -156,7 +160,7 @@ var budget_scale = d3.scaleQuantize()
         .key(function(d){ return timeformat(d.date);})
         .rollup(function(leaves){return leaves.length;})
         .entries(movie_data)
-        .sort(function(a,b){return d3.ascending(a.key,b.key);});
+        .sort(function(a,b){return d3.descending(a.key,b.key);});
     console.log(countryByYear);
 
     //Time scale
