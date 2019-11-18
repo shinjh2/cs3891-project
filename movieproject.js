@@ -1,7 +1,7 @@
 
 function plot_it()  {
   
-	var width = 1850, height = 1750, plot_dim = 350;
+	var width = 2850, height = 2750, plot_dim = 350;
 	d3.select('body').append('svg').attr('width', width).attr('height', height);
 	var pad = 50;
 	var actual_width = width-2*pad, actual_height = height-2*pad;
@@ -15,6 +15,8 @@ function plot_it()  {
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 400)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 900)+','+(pad+bar1_y)+')').attr('id', 'company').attr('width', plot_dim).attr('height', plot_dim)
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1300)+','+(pad+bar1_y)+')').attr('id', 'country').attr('width', plot_dim).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y + 500)+')').attr('id', 'scatter').attr('width', plot_dim*2).attr('height', plot_dim*2)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1700)+','+(pad+bar1_y)+')').attr('id', 'time').attr('width', plot_dim*2.5).attr('height', plot_dim)
 
 
 /// select attributes we're interested in
@@ -22,6 +24,12 @@ function plot_it()  {
 		d.budget = +d.budget;
         d.date = d.release_date;
   });
+
+  for(i = movie_data.length - 1; i >= 0; i -= 1){
+    if(movie_data[i].budget == 0 || movie_data[i].revenue == 0 || movie_data[i].vote_average == 0){
+      movie_data.splice(i,1);
+    }
+  }
   
 var budget_intervals = ["0-19.8M", "19.8-39.6M", "39.6M-59.4M", "59.4M-79.2M", "79.2M-99M"];
 
@@ -66,6 +74,7 @@ var budget_scale = d3.scaleQuantize()
         .key(function(d){return d;})
         .rollup(function(leaves){return leaves.length;})
         .entries(country_types)
+        .sort(function(a,b){return d3.descending(a.value,b.value);});
                
 
 
@@ -150,6 +159,18 @@ var budget_scale = d3.scaleQuantize()
         .sort(function(a,b){return d3.ascending(a.key,b.key);});
     console.log(countryByYear);
 
+    //Time scale
+    var years = [];
+    for(var i = 0; i < countryByYear.length; i++) {
+        years.push(countryByYear[i]['key']);
+    }
+    var time_xscale = d3.scaleBand().domain(years).range([plot_dim*2.5, 0]).padding(.05);
+
+    var max_year_count = d3.max(countryByYear, d => d['value']);
+    var time_yscale = d3.scaleLinear().domain([0,max_year_count]).range([plot_dim, 0]);
+
+    
+
 
     //scales for budget
     var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
@@ -184,10 +205,11 @@ var budget_scale = d3.scaleQuantize()
 
     var min_circle_x = d3.min(movie_data,d => d.revenue);
     var max_circle_x = d3.max(movie_data,d => d.revenue);
+    console.log(max_circle_x);
     var min_circle_y = d3.min(movie_data, d => d.vote_average);
     var max_circle_y = d3.max(movie_data, d => d.vote_average);
-    var scatter_scale_x = d3.scaleLinear().domain([min_circle_x,max_circle_x]).range([2,1000]);
-    var scatter_scale_y = d3.scaleLinear().domain([min_circle_y,max_circle_y]).range([1000,2]);
+    var scatter_scale_x = d3.scaleLinear().domain([min_circle_x,max_circle_x]).range([0,plot_dim*2]);
+    var scatter_scale_y = d3.scaleLinear().domain([min_circle_y,max_circle_y]).range([plot_dim*2, 0]);
 
     d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
         .attr('x', d => budget_xscale(d['key']))
@@ -217,8 +239,15 @@ var budget_scale = d3.scaleQuantize()
 	      .attr('height', function(d) { return plot_dim - genre_yscale(d['value']);})
         .attr('fill', "blue")
 
+    d3.select('#time').selectAll('empty').data(countryByYear).enter().append('rect')
+        .attr('x', d => time_xscale(d['key']))
+        .attr('y', d => time_yscale(d['value']))
+        .attr('width', time_xscale.bandwidth())
+        .attr('height', function(d) { return plot_dim - time_yscale(d['value']);})
+        .attr('fill', "blue")
 
-    d3.select('svg').selectAll('circles').data(movie_data).enter().append('circle')
+
+    d3.select('#scatter').selectAll('empty').data(movie_data).enter().append('circle')
         .attr('cx', d => scatter_scale_x(d.revenue))
         .attr('cy', d => scatter_scale_y(d.vote_average))
         .attr('r', 1.5)
@@ -256,7 +285,7 @@ var budget_scale = d3.scaleQuantize()
       .attr("x", 9)
       .attr("transform", "rotate(90)")
       .style("text-anchor", "start");
-
+    //COMPANY AXIS
     var company_y_axis = d3.axisLeft(company_yscale)
     d3.select('#company').append('g').attr('id', 'company_yaxis')
 
@@ -274,7 +303,7 @@ var budget_scale = d3.scaleQuantize()
       .attr("x", 9)
       .attr("transform", "rotate(90)")
       .style("text-anchor", "start");
-
+    //COUNTRY AXIS
     var country_y_axis = d3.axisLeft(country_yscale)
     d3.select('#country').append('g').attr('id', 'country_yaxis')
 
@@ -292,7 +321,46 @@ var budget_scale = d3.scaleQuantize()
       .attr("x", 9)
       .attr("transform", "rotate(90)")
       .style("text-anchor", "start");
+    //SCATTER AXIS
+    var scatter_y_axis = d3.axisLeft(scatter_scale_y)
+    d3.select('#scatter').append('g').attr('id', 'scatter_yaxis')
 
+    d3.select('#scatter_yaxis').append("g")
+      .call(scatter_y_axis)
+  
+      var scatter_x_axis = d3.axisBottom(scatter_scale_x)
+      d3.select('#scatter').append('g').attr('id', 'scatter_xaxis')
+      
+      d3.select('#scatter_xaxis').append("g")
+        .call(scatter_x_axis)
+        .attr("transform", "translate(0," + plot_dim*2 + ")")
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+    //TIME AXIS
+
+    var time_y_axis = d3.axisLeft(time_yscale)
+    d3.select('#time').append('g').attr('id', 'time_yaxis')
+
+    d3.select('#time_yaxis').append("g")
+      .call(time_y_axis)
+  
+      var time_x_axis = d3.axisBottom(time_xscale)
+      d3.select('#time').append('g').attr('id', 'time_xaxis')
+      
+      d3.select('#time_xaxis').append("g")
+        .call(time_x_axis)
+        .attr("transform", "translate(0," + plot_dim + ")")
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+  
+  
     //PLOT LABELS
     d3.select('#budget').append('text').text('Movie Budget vs Frequency')
     .attr('transform', 'translate('+(plot_dim/2)+',-15)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '20px')
@@ -321,7 +389,7 @@ var budget_scale = d3.scaleQuantize()
     d3.select('#company').append('text').text('Production Company')
     .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+170)+')').attr('text-anchor', 'middle').attr('fill', '#000')
 
-    d3.select('#company').append('text').text('*"Others" includes 11k+ movies')
+    d3.select('#company').append('text').text('*"Others" includes 8k+ movies')
     .attr('transform', 'translate('+(plot_dim)+',-8)').attr('fill', '#000').attr('font-size', '9px')
 
     d3.select('#country').append('text').text('Production Country vs Frequency')
@@ -333,6 +401,24 @@ var budget_scale = d3.scaleQuantize()
     d3.select('#country').append('text').text('Production Country')
     .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+90)+')').attr('text-anchor', 'middle').attr('fill', '#000')
 
-    d3.select('#country').append('text').text('*"U.S." include 3.9k+ movies')
+    d3.select('#country').append('text').text('*"U.S." include 2.9k+ movies')
     .attr('transform', 'translate('+(plot_dim)+',-8)').attr('fill', '#000').attr('font-size', '9px')
+
+    d3.select('#scatter').append('text').text('Revenue vs Rating')
+    .attr('transform', 'translate('+(plot_dim)+',-15)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '20px')
+    
+    d3.select('#scatter').append('text').text('Rating')
+    .attr('transform', 'translate('+(-35)+','+(plot_dim)+') rotate(270)').attr('text-anchor', 'middle').attr('fill', '#000')
+    
+    d3.select('#scatter').append('text').text('Revenue')
+    .attr('transform', 'translate('+(plot_dim)+','+(plot_dim*2+90)+')').attr('text-anchor', 'middle').attr('fill', '#000')
+
+    d3.select('#time').append('text').text('Year Produced vs Frequency')
+    .attr('transform', 'translate('+(plot_dim*2.5/2)+',-15)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '20px')
+    
+    d3.select('#time').append('text').text('Number of Movies')
+    .attr('transform', 'translate('+(-35)+','+(plot_dim/2)+') rotate(270)').attr('text-anchor', 'middle').attr('fill', '#000')
+    
+    d3.select('#time').append('text').text('Year Produced')
+    .attr('transform', 'translate('+(plot_dim*2.5/2)+','+(plot_dim+90)+')').attr('text-anchor', 'middle').attr('fill', '#000')
 }
