@@ -66,7 +66,7 @@ function plot_it()  {
     // only budget has been implemented so far
 
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget').attr('width', plot_dim).attr('height', plot_dim)
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 400)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
 
 
 /// select attributes we're interested in
@@ -118,11 +118,11 @@ var budget_scale = d3.scaleQuantize()
         genre_names.push(nested_genres[i]['key']);
     }
 
-    var genre_xscale = d3.scaleBand().domain(genre_names).range([bar_height, 0]);
+    var genre_xscale = d3.scaleBand().domain(genre_names).range([plot_dim, 0]).padding(.05);
 
     var min_genre_count= d3.min(nested_genres, d => d['value']);
     var max_genre_count = d3.max(nested_genres, d => d['value']);
-    var genre_yscale = d3.scaleLinear().domain([min_genre_count,max_genre_count]).range([0,bar_height]);
+    var genre_yscale = d3.scaleLinear().domain([0,max_genre_count]).range([plot_dim, 0]);
     console.log(nested_genres);
 
     d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
@@ -133,25 +133,44 @@ var budget_scale = d3.scaleQuantize()
              .attr('fill', "blue")
 
 
-    d3.select('#genre').selectAll('empty').data(nested_genres).enter().append('circle')
-        .attr('cx', d => genre_xscale(d['key']))
-        .attr('cy', d => genre_yscale(d['value']))
-        .attr('r', 5)
+    d3.select('#genre').selectAll('empty').data(nested_genres).enter().append('rect')
+        .attr('x', d => genre_xscale(d['key']))
+        .attr('y', d => genre_yscale(d['value']))
+        .attr('width', genre_xscale.bandwidth())
+	      .attr('height', function(d) { return plot_dim - genre_yscale(d['value']);})
         .attr('fill', "blue")
 
     // X AXIS Y AXIS
-    var y_axis = d3.axisLeft(budget_yscale)
-    d3.select('#budget').append('g').attr('id', 'yaxis')
+    var budget_y_axis = d3.axisLeft(budget_yscale)
+    d3.select('#budget').append('g').attr('id', 'budget_yaxis')
 
-    d3.select('#yaxis').append("g")
-      .call(y_axis)
+    d3.select('#budget_yaxis').append("g")
+      .call(budget_y_axis)
 
-    var x_axis = d3.axisBottom(budget_xscale)
-    d3.select('#budget').append('g').attr('id', 'xaxis')
+    var budget_x_axis = d3.axisBottom(budget_xscale)
+    d3.select('#budget').append('g').attr('id', 'budget_xaxis')
     
-    d3.select('#xaxis').append("g")
-      .call(x_axis)
+    d3.select('#budget_xaxis').append("g")
+      .call(budget_x_axis)
       .attr("transform", "translate(0," + plot_dim + ")")
+
+    var genre_y_axis = d3.axisLeft(genre_yscale)
+    d3.select('#genre').append('g').attr('id', 'genre_yaxis')
+
+    d3.select('#genre_yaxis').append("g")
+      .call(genre_y_axis)
+
+    var genre_x_axis = d3.axisBottom(genre_xscale)
+    d3.select('#genre').append('g').attr('id', 'genre_xaxis')
+    
+    d3.select('#genre_xaxis').append("g")
+      .call(genre_x_axis)
+      .attr("transform", "translate(0," + plot_dim + ")")
+      .selectAll("text")
+      .attr("y", 0)
+      .attr("x", 9)
+      .attr("transform", "rotate(90)")
+      .style("text-anchor", "start");
 
     //PLOT LABELS
     d3.select('#budget').append('text').text('Movie Budget vs Frequency')
@@ -162,4 +181,13 @@ var budget_scale = d3.scaleQuantize()
     
     d3.select('#budget').append('text').text('Budget in Millions')
     .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+30)+')').attr('text-anchor', 'middle').attr('fill', '#000')
+
+    d3.select('#genre').append('text').text('Movie Genre vs Frequency')
+    .attr('transform', 'translate('+(plot_dim/2)+',-15)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '20px')
+    
+    d3.select('#genre').append('text').text('Number of Movies')
+    .attr('transform', 'translate('+(-35)+','+(plot_dim/2)+') rotate(270)').attr('text-anchor', 'middle').attr('fill', '#000')
+    
+    d3.select('#genre').append('text').text('Genre')
+    .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+60)+')').attr('text-anchor', 'middle').attr('fill', '#000')
 }
