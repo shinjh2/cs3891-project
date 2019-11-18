@@ -43,8 +43,8 @@
 
 
 function plot_it()  {
-
-	var width = 850, height = 750;
+  
+	var width = 850, height = 750, plot_dim = 350;
 	d3.select('body').append('svg').attr('width', width).attr('height', height);
 	var pad = 50;
 	var actual_width = width-2*pad, actual_height = height-2*pad;
@@ -52,7 +52,7 @@ function plot_it()  {
 
 	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
 	var bar1_y = 0;
-                                                                   ]
+                                                                   
 
     //here our independent bar plots are of budget, coutnry, genre, production companies,
     //release date. Our dependent scatter plots that are the outcome are of revenue and rating
@@ -65,38 +65,60 @@ function plot_it()  {
 
     // only budget has been implemented so far
 
-    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget')
+    d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget').attr('width', plot_dim).attr('height', plot_dim)
 
 
 
 /// select attributes we're interested in
 	movie_data.forEach(d => {
 		d.budget = +d.budget;
-	});
+  });
+  
+var budget_intervals = ["0-19.8M", "19.8-39.6M", "39.6M-59.4M", "59.4M-79.2M", "79.2M-99M"];
 
-
+var budget_scale = d3.scaleQuantize()
+  .domain([0, 99000000])
+  .range(budget_intervals);
 /// data for the first 5 filters's plot
 	var nested_budget = d3.nest()
-		.key(function(d){return d.budget;}).sortKeys(d3.ascending)
+		.key(function(d){return budget_scale(d.budget);})
 		.rollup(function(leaves){return leaves.length;})
 		.entries(movie_data)
 
+    var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
 
-    var min_budget= d3.min(nested_budget, d => d['key']);
-    var max_budget = d3.max(nested_budget, d => d['key']);
-    var budget_xscale = d3.scaleLinear().domain([min_budget,max_budget]).range([0,bar_width]);
-
-
-    var min_budget_count= d3.min(nested_budget, d => d['value']);
     var max_budget_count = d3.max(nested_budget, d => d['value']);
-    var budget_yscale = d3.scaleLinear().domain([min_budget_count,max_budget_count]).range([0,bar_height]);
-
-
-    d3.select('budget').selectAll('empty').data(nested_budget).enter().append('g').attr('id', 'budgetme')
+    var budget_yscale = d3.scaleLinear().domain([0,max_budget_count]).range([plot_dim, 0]);
+    console.log(nested_budget);
     
-    d3.selectAll('budgetme').selectAll('empty').data(d => d).enter().append('circle')
-             .attr('cx', d => budget_xscale(d['key']))
-             .attr('cy', d => budget_yscale(d['value']))
+    d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
+             .attr('x', d => budget_xscale(d['key']))
+             .attr('y', function(d) { return budget_yscale(d['value']);})
+             .attr('width', budget_xscale.bandwidth())
+	           .attr('height', function(d) { return plot_dim - budget_yscale(d['value']);})
+             .attr('fill', "blue")
 
+    // X AXIS Y AXIS
+    var y_axis = d3.axisLeft(budget_yscale)
+    d3.select('#budget').append('g').attr('id', 'yaxis')
 
+    d3.select('#yaxis').append("g")
+      .call(y_axis)
+
+    var x_axis = d3.axisBottom(budget_xscale)
+    d3.select('#budget').append('g').attr('id', 'xaxis')
+    
+    d3.select('#xaxis').append("g")
+      .call(x_axis)
+      .attr("transform", "translate(0," + plot_dim + ")")
+
+    //PLOT LABELS
+    d3.select('#budget').append('text').text('Movie Budget vs Frequency')
+    .attr('transform', 'translate('+(plot_dim/2)+',-15)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '20px')
+    
+    d3.select('#budget').append('text').text('Number of Movies')
+    .attr('transform', 'translate('+(-35)+','+(plot_dim/2)+') rotate(270)').attr('text-anchor', 'middle').attr('fill', '#000')
+    
+    d3.select('#budget').append('text').text('Budget in Millions')
+    .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+30)+')').attr('text-anchor', 'middle').attr('fill', '#000')
 }
