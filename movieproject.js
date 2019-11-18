@@ -52,7 +52,7 @@ function plot_it()  {
 
 	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
 	var bar1_y = 0;
-                                                                   ]
+                                                                   
 
     //here our independent bar plots are of budget, coutnry, genre, production companies,
     //release date. Our dependent scatter plots that are the outcome are of revenue and rating
@@ -90,13 +90,15 @@ function plot_it()  {
     var min_budget_count= d3.min(nested_budget, d => d['value']);
     var max_budget_count = d3.max(nested_budget, d => d['value']);
     var budget_yscale = d3.scaleLinear().domain([min_budget_count,max_budget_count]).range([0,bar_height]);
+    console.log(nested_budget);
 
-
-    d3.select('budget').selectAll('empty').data(nested_budget).enter().append('g').attr('id', 'budgetme')
+    //d3.select('budget').selectAll('empty').data(nested_budget).enter().append('g').attr('id', 'budgetme')
     
-    d3.selectAll('budgetme').selectAll('empty').data(d => d).enter().append('circle')
+    d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('circle')
              .attr('cx', d => budget_xscale(d['key']))
              .attr('cy', d => budget_yscale(d['value']))
+             .attr('r', 5)
+             .attr('fill', "blue")
 
 
 }
