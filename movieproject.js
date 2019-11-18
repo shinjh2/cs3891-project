@@ -20,6 +20,7 @@ function plot_it()  {
 /// select attributes we're interested in
 	movie_data.forEach(d => {
 		d.budget = +d.budget;
+        d.date = d.release_date;
   });
   
 var budget_intervals = ["0-19.8M", "19.8-39.6M", "39.6M-59.4M", "59.4M-79.2M", "79.2M-99M"];
@@ -137,6 +138,18 @@ var budget_scale = d3.scaleQuantize()
     companies = top20_moviebyCompany.map(d=>d.key);
     console.log(top20_moviebyCompany);
 
+    var timeparser = d3.timeParse('%m/%d/%Y');
+    var timeformat = d3.timeFormat('%Y')
+
+    movie_data.forEach( d=> {d.date = timeparser(d.date);});
+
+    var countryByYear = d3.nest()
+        .key(function(d){ return timeformat(d.date);})
+        .rollup(function(leaves){return leaves.length;})
+        .entries(movie_data)
+        .sort(function(a,b){return d3.ascending(a.key,b.key);});
+    console.log(countryByYear);
+
 
     //scales for budget
     var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
@@ -169,6 +182,13 @@ var budget_scale = d3.scaleQuantize()
     var company_yscale = d3.scaleLinear().domain([0,319]).range([plot_dim, 0]);
 
 
+    var min_circle_x = d3.min(movie_data,d => d.revenue);
+    var max_circle_x = d3.max(movie_data,d => d.revenue);
+    var min_circle_y = d3.min(movie_data, d => d.vote_average);
+    var max_circle_y = d3.max(movie_data, d => d.vote_average);
+    var scatter_scale_x = d3.scaleLinear().domain([min_circle_x,max_circle_x]).range([2,1000]);
+    var scatter_scale_y = d3.scaleLinear().domain([min_circle_y,max_circle_y]).range([1000,2]);
+
     d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
         .attr('x', d => budget_xscale(d['key']))
         .attr('y', function(d) { return budget_yscale(d['value']);})
@@ -196,6 +216,14 @@ var budget_scale = d3.scaleQuantize()
         .attr('width', genre_xscale.bandwidth())
 	      .attr('height', function(d) { return plot_dim - genre_yscale(d['value']);})
         .attr('fill', "blue")
+
+
+    d3.select('svg').selectAll('circles').data(movie_data).enter().append('circle')
+        .attr('cx', d => scatter_scale_x(d.revenue))
+        .attr('cy', d => scatter_scale_y(d.vote_average))
+        .attr('r', 1.5)
+        .attr('fill','blue')
+        .attr('opacity',0.8)
 
     // X AXIS Y AXIS
     var budget_y_axis = d3.axisLeft(budget_yscale)
