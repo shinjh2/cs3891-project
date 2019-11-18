@@ -88,7 +88,6 @@ var budget_scale = d3.scaleQuantize()
     var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
 
     var max_budget_count = d3.max(nested_budget, d => d['value']);
-<<<<<<< HEAD
     var budget_yscale = d3.scaleLinear().domain([0,max_budget_count]).range([plot_dim, 0]);
     console.log(nested_budget);
     
@@ -112,19 +111,6 @@ var budget_scale = d3.scaleQuantize()
     d3.select('#xaxis').append("g")
       .call(x_axis)
       .attr("transform", "translate(0," + plot_dim + ")")
-=======
-    var budget_yscale = d3.scaleLinear().domain([min_budget_count,max_budget_count]).range([0,bar_height]);
-    console.log(nested_budget);
-
-    //d3.select('budget').selectAll('empty').data(nested_budget).enter().append('g').attr('id', 'budgetme')
-    
-    d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('circle')
-             .attr('cx', d => budget_xscale(d['key']))
-             .attr('cy', d => budget_yscale(d['value']))
-             .attr('r', 5)
-             .attr('fill', "blue")
-
->>>>>>> 435cd10d926a46f4ce2aacbb9998c24df870c4a8
 
     //PLOT LABELS
     d3.select('#budget').append('text').text('Movie Budget vs Frequency')
