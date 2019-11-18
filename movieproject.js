@@ -1,46 +1,3 @@
-//Email I got from Berger about our vis:
-
-//Hi Jason,
-//
-// Just to briefly follow up our discussion, as I was a bit crunched for time earlier:
-//
-// It is worth separating the independent attributes in the movies data from the dependent attributes.
-// Independent attributes, here, means aspects of movies that are not measured, e.g. year, director, genre,
-// etc.. whereas dependent attributes are movie gross, ratings, etc..
-//
-// By decoupling these attributes, you can select the independent attributes (through linked, multiple views
-// as we discussed) to then trigger novel views for the dependent attributes (e.g. scatterplot). Now, another
-// thing to consider is how you select: as we discussed brushes across attributes could correspond to intersections.
-// But, you could also consider the union operator for a single attribute, which then highlights those points differently
-// in the scatterplot. For instance, if a user clicks on two bars that correspond to two different genres, then in your
-// scatterplot you could color points differently based on genre. This way, you can compare multiple values within an
-// attribute (e.g. action and comedy), and still filter movies based on the other attribute selections (e.g. limit
-// movies to years 1990-1999).
-//
-// Furthermore, if you'd like to show directors in your plots, one thing you could do is select a small amount of
-// prominent directors (either automatically, or even manually, e.g. Stephen Spielberg, Martin Scorsese, those who have
-// directed a lot of well-known movies), and visually encode movies directed by these people differently in your scatterplot.
-// That way, you can compare movies directed by prominent directors with the rest of the movies.
-//
-// Good luck in putting together the prototype.
-//
-
-
-//function create_dom_element(element_name)  {
-//    return document.createElementNS('http://www.w3.org/2000/svg', element_name);
-//}
-
-//function get_single_element_by_name(element_name)  {
-//    return document.getElementsByTagName(element_name)[0];
-//}
-
-
-
-// I cant get anything to show up on my local host even when i leave the plot_it function blank
-// and leave only a text group, so I cant test how to implement intervals in a rollup
-// first step needs to be to make sure that the stuff even shows up in the first place on the server
-// so we can test if it works as we go.
-
 
 function plot_it()  {
   
@@ -52,18 +9,7 @@ function plot_it()  {
 
 	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
 	var bar1_y = 0;
-                                                                   
 
-    //here our independent bar plots are of budget, coutnry, genre, production companies,
-    //release date. Our dependent scatter plots that are the outcome are of revenue and rating
-    //see Berger's comment as to why this is so
-
-    //challenges:
-    // budget and release date need to be rolled up into intervals
-    // country, genre and production companies are each in arrays that each need to be parsed through
-
-
-    // only budget has been implemented so far
 
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y)+')').attr('id', 'budget').attr('width', plot_dim).attr('height', plot_dim)
     d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 400)+','+(pad+bar1_y)+')').attr('id', 'genre').attr('width', plot_dim).attr('height', plot_dim)
@@ -102,13 +48,94 @@ var budget_scale = d3.scaleQuantize()
         .entries(genre_types)
     console.log(nested_genres);
 
+    //unrolled array of countries
+    var country_types = [];
+    for(var i = 0; i < movie_data.length; i++){
+        var j = 7;
+        while(movie_data[i]['production_countries'].split('"')[j] != null){
+            country_types.push(movie_data[i]['production_countries'].split('"')[j])
+            j += 8;
+        }
+    }
+    console.log(country_types);
+
+    var nested_countries = d3.nest()
+        .key(function(d){return d;})
+        .rollup(function(leaves){return leaves.length;})
+        .entries(country_types)
+        .sort(function(a,b){return d3.descending(a.value,b.value);});
+    console.log(nested_countries);
+
+    var countries = nested_countries.map(d=>d.key);
+    var country_counts = nested_countries.map(d=>d.value);
+
+    var top20_counts = []
+    for (var i=0;i<19;i++){
+        top20_counts.push(country_counts[i]);
+    }
+    var top20_countries = []
+    for (var i=0;i<19;i++){
+        top20_countries.push(countries[i]);
+    }
+    var other_counts = 0
+    for (var i = 19;i<country_counts.length;i++){
+        other_counts += country_counts[i];
+    }
+    var top20_moviebyCountry = []
+    for (var i=0;i<19;i++){
+        top20_moviebyCountry.push(nested_countries[i]);
+    }
+    top20_moviebyCountry.push({key:'Others',value:other_counts});
+    console.log(top20_moviebyCountry);
+
+
+    //unrolled array of production companies
+    var company_types = [];
+    for(var i = 0; i < movie_data.length; i++){
+        var j = 3;
+        while(movie_data[i]['production_companies'].split('"')[j] != null){
+            company_types.push(movie_data[i]['production_companies'].split('"')[j])
+            j += 6;
+        }
+    }
+    console.log(company_types);
+
+    var nested_companies = d3.nest()
+        .key(function(d){return d;})
+        .rollup(function(leaves){return leaves.length;})
+        .entries(company_types)
+        .sort(function(a,b){return d3.descending(a.value,b.value);});
+    console.log(nested_companies);
+
+
+    var companies = nested_companies.map(d=>d.key);
+    var company_counts = nested_companies.map(d=>d.value);
+
+    var top20_company_counts = []
+    for (var i=0;i<19;i++){
+        top20_company_counts.push(company_counts[i]);
+    }
+    var top20_companies = []
+    for (var i=0;i<19;i++){
+        top20_companies.push(companies[i]);
+    }
+    var others_counts = 0
+    for (var i = 19;i<company_counts.length;i++){
+        others_counts += company_counts[i];
+    }
+    var top20_moviebyCompany = []
+    for (var i=0;i<19;i++){
+        top20_moviebyCompany.push(nested_companies[i]);
+    }
+    top20_moviebyCompany.push({key:'Others',value:others_counts});
+    console.log(top20_moviebyCompany);
+
+
     //scales for budget
     var budget_xscale = d3.scaleBand().domain(budget_intervals).range([0,plot_dim]).padding(.05);
 
     var max_budget_count = d3.max(nested_budget, d => d['value']);
     var budget_yscale = d3.scaleLinear().domain([0,max_budget_count]).range([plot_dim, 0]);
-    console.log(nested_budget);
-
 
 
     //scales for genre
@@ -117,13 +144,23 @@ var budget_scale = d3.scaleQuantize()
     for(var i = 0; i < nested_genres.length; i++) {
         genre_names.push(nested_genres[i]['key']);
     }
-
     var genre_xscale = d3.scaleBand().domain(genre_names).range([plot_dim, 0]).padding(.05);
 
-    var min_genre_count= d3.min(nested_genres, d => d['value']);
     var max_genre_count = d3.max(nested_genres, d => d['value']);
     var genre_yscale = d3.scaleLinear().domain([0,max_genre_count]).range([plot_dim, 0]);
-    console.log(nested_genres);
+
+
+
+    var country_xscale = d3.scaleBand().domain(countries).range([plot_dim, 0]).padding(.05);
+
+    var max_country_count = d3.max(nested_countries, d => d['value']);
+    var country_yscale = d3.scaleLinear().domain([0,max_country_count]).range([plot_dim, 0]);
+
+    var company_xscale = d3.scaleBand().domain(companies).range([plot_dim, 0]).padding(.05);
+
+    var max_company_count = d3.max(nested_companies, d => d['value']);
+    var company_yscale = d3.scaleLinear().domain([0,max_company_count]).range([plot_dim, 0]);
+
 
     d3.select('#budget').selectAll('empty').data(nested_budget).enter().append('rect')
              .attr('x', d => budget_xscale(d['key']))
