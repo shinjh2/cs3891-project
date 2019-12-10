@@ -22,15 +22,16 @@ values of certain attributes such as genre or company when each movie held sever
 
 Implementation: Our design starts with the implementation of a menu of bar plots for each independent movie attribute (genre, budget, produciton 
 company, coutry, date). The y axis of each of these plots hold the count of movies, while the x axis corresponds to each attribute. By continuing to 
-select certain bars of an attribute, the user can see the affect this has on other attributes through a transition, which displays what fraction of the 
-selection are present in the other attributes through a fraction of a bar. The user can reset his selection with a reset button, which undoes any of the
-attribute ranges selected so a new selection can be created. There is also a scatter plot where the y axis contains the range of ratings, while the x 
-axis contains the range of revenue. Through the menu selection, the user can now see all of the movies in the selection in this scatter plot, which also
-displays the relationship between these two dependent attributes. see nextdesign1.png for a sketch of this visualization. 
+select certain bars of an attribute, the user can see the affect this has on other attributes, by displaying new fractions of previous bars with each new
+intersection. This allows direct comparisons between selections as new attribute filters are selected. There is also a scatter plot where the y axis 
+contains the range of ratings, while the x axis contains the range of revenue. Through the menu selection, the user can now see all of the movies 
+in the selection in this scatter plot, which also displays the relationship between these two dependent attributes. see nextdesign1.png for a sketch 
+of this visualization. 
 
 Exploratory Data Analysis: Visualizations we used to initially look at our data consisted of the bar plots of movie counts of certain attributes.
 Because we found certain attributes such as country or production company contained hundreds of individual values with each a count of 1, this
-influenced our design into creating an "others" category, where all of the extra movies could be bucketed into. 
+influenced our design into creating an "others" category, where all of the extra movies could be bucketed into. Comparison of those "others" categories 
+also took consideration as they could form outliers that made effective comparisons difficult. 
 
 
 Design Evolution: design_1.png, design2.png, and design3.png show the initial designs for the visualization. These visualizations consisted of 
@@ -38,8 +39,11 @@ a drop down menu which created selections that would build a scatter plot and a 
 of the design because of the limited amount of views and comparions between the attributes that could be made. Because of these insights, our design 
 was altered so the menu consisted of linked bar plots for our attributes, so when users made selections on one bar plot, he could view the impact that 
 selection had on all of the other attributes. This created a much more fluid and interactive design that could potentially inform our user far better. 
+Our design further changed so that new selections would create new fractional bars for the visualizaiton. This allowed for more effective comparisons of
+each effect of an attribute filter. 
 
 Analysis: We've learned of the heavy biases present in our data which means that to produce meaningful visualizations for relationships, 
-our design needs to consider what to do with outliers. We've temporily solved this by treating the outliers as special exceptions that do not
-influence our scale, but further design changes will be made to accomodate them. We could continue to improve our visualization by adding new views 
-such as a map for location that could offer the user new insight of some patterns between attributes that could not be as clearly seen before. 
+our design needs to consider what to do with outliers. We've solved this by first treating the outliers with their own specific scale to fit the graph.
+A precaution is used to warn the viewer that any fractional comparisons made with those outlier bars with other barse would thus not be accurate.
+We could continue to improve our visualization by adding new views  such as a map for location that could offer the user new insight of some 
+patterns between attributes that could not be as clearly seen before. 
