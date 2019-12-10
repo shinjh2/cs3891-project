@@ -9,15 +9,19 @@ nongenre_filtered_IDS = []
 noncompany_filtered_IDS = []
 noncountry_filtered_IDS = []
 nontime_filtered_IDS = []
+top20_companies = []
+top20_countries = []
+
+
 function plot_it()  {
   
-	var width = 2850, height = 2750, plot_dim = 200;
-	d3.select('body').append('svg').attr('width', width).attr('height', height);
-	var pad = 50;
-	var actual_width = width-2*pad, actual_height = height-2*pad;
+  var width = 2850, height = 2750, plot_dim = 200;
+  d3.select('body').append('svg').attr('width', width).attr('height', height);
+  var pad = 50;
+  var actual_width = width-2*pad, actual_height = height-2*pad;
 
 
-	var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
+  var bar_x = 0, bar_width = actual_width/2, bar_height = actual_height/6;
   var bar1_y = 0;
 
 
@@ -27,13 +31,13 @@ function plot_it()  {
     var country_group = d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 750)+','+ (pad+bar1_y)+')').attr('id', 'country').attr('width', plot_dim).attr('height', plot_dim)
     var scatter_group = d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x + 1025)+','+(pad+bar1_y+ 75)+')').attr('id', 'scatter').attr('width', plot_dim*2).attr('height', plot_dim*2)
     var rect_selection = scatter_group.append('rect')
-		.attr('fill', 'None').attr('pointer-events', 'all').attr('width', plot_dim*2).attr('height', plot_dim*2)
+    .attr('fill', 'None').attr('pointer-events', 'all').attr('width', plot_dim*2).attr('height', plot_dim*2)
     var time_group = d3.select('svg').append('g').attr('transform', 'translate('+(pad+bar_x)+','+(pad+bar1_y + 350)+')').attr('id', 'time').attr('width', plot_dim*4.7).attr('height', plot_dim)
 
 
 /// select attributes we're interested in
-	movie_data.forEach(d => {
-		d.budget = +d.budget;
+  movie_data.forEach(d => {
+    d.budget = +d.budget;
         d.date = d.release_date;
         d.vote_average = +d.vote_average;
         d.revenue = +d.revenue;
@@ -177,7 +181,7 @@ var company_counts = nested_companies.map(d=>d.value);
   for (var i=0;i<19;i++){
       top20_company_counts.push(company_counts[i]);
   }
-  var top20_companies = []
+  //var top20_companies = []
   for (var i=0;i<19;i++){
       top20_companies.push(companies[i]);
   }
@@ -189,7 +193,7 @@ var company_counts = nested_companies.map(d=>d.value);
   for (var i=0;i<19;i++){
       top20_moviebyCompany.push(nested_companies[i]);
   }
-  top20_moviebyCompany.unshift({key:'Others',value:330});
+  top20_moviebyCompany.unshift({key:'Others',value:others_counts/25});
   companies = top20_moviebyCompany.map(d=>d.key);
 
 //SCALES for companies
@@ -243,7 +247,7 @@ var top20_counts = []
 for (var i=0;i<19;i++){
     top20_counts.push(country_counts[i]);
 }
-var top20_countries = []
+
 for (var i=0;i<19;i++){
     top20_countries.push(countries[i]);
 }
@@ -256,8 +260,8 @@ for (var i=0;i<19;i++){
     top20_moviebyCountry.push(nested_countries[i]);
 }
 
-top20_moviebyCountry.push({key:'Others',value:636});
-top20_moviebyCountry[0]['value'] = 700;
+top20_moviebyCountry.push({key:'Others',value:other_counts});
+//top20_moviebyCountry[0]['value'] = top20_moviebyCountry[0]['value']/14.5 ;
 
 top20_moviebyCountry.sort(function(a,b){return d3.descending(a.value,b.value);});
 var countries = top20_moviebyCountry.map(d=>d.key);
@@ -410,7 +414,7 @@ function generate_budget_plot(movie_data, plot_dim, budget_scales, genre_scales,
   .range(budget_intervals);
 
   // NESTED budget array
-	var nested_budget = d3.nest()
+  var nested_budget = d3.nest()
   .key(function(d){return budget_scale(d.budget);})
   .rollup(function(leaves){return leaves.length;})
   .entries(movie_data)
@@ -516,7 +520,7 @@ function generate_company_plot(movie_data, plot_dim, budget_scales, genre_scales
     for (var i=0;i<19;i++){
         top20_moviebyCompany.push(nested_companies[i]);
     }
-    top20_moviebyCompany.unshift({key:'Others',value:330});
+    top20_moviebyCompany.unshift({key:'Others',value:others_counts/25});
     companies = top20_moviebyCompany.map(d=>d.key);
 
 
@@ -529,17 +533,20 @@ function generate_company_plot(movie_data, plot_dim, budget_scales, genre_scales
         .attr('fill', bar_color)
 
   //PLOT labels
-  d3.select('#company').append('text').text('Production Company vs Frequency')
+  d3.select('#company').append('text').text('Company vs Frequency')
     .attr('transform', 'translate('+(plot_dim/2)+',-25)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '15px')
     
   d3.select('#company').append('text').text('Number of Movies')
     .attr('transform', 'translate('+(-35)+','+(plot_dim/2)+') rotate(270)').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '13px')
     
-  d3.select('#company').append('text').text('Production Company')
+  d3.select('#company').append('text').text('Company')
     .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+170)+')').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '13px')
 
-  d3.select('#company').append('text').text('*"Others" includes 8k+ movies')
-    .attr('transform', 'translate('+(plot_dim - 135)+',8)').attr('fill', '#000').attr('font-size', '9px')
+  d3.select('#company').append('text').text('*"Others" includes 8k+ movies.')
+    .attr('transform', 'translate('+(plot_dim - 145)+',8)').attr('fill', '#000').attr('font-size', '9px')
+
+  d3.select('#company').append('text').text('It\'s not proportional to the other bars.')
+    .attr('transform', 'translate('+(plot_dim - 145)+',15)').attr('fill', '#000').attr('font-size', '9px')
 
     click_interaction_company(d3.select('#company').selectAll('rect'), movie_data, {'xscale':budget_scales.xscale,'yscale':budget_scales.yscale}, {'xscale':genre_scales.xscale,'yscale':genre_scales.yscale}, {'xscale':company_scales.xscale,'yscale':company_scales.yscale}, {'xscale':country_scales.xscale,'yscale':country_scales.yscale}, {'xscale':time_scales.xscale,'yscale':time_scales.yscale}, {'xscale':scatter_scales.xscale,'yscale':scatter_scales.yscale}, plot_dim);
 
@@ -584,11 +591,14 @@ function generate_country_plot(movie_data, plot_dim, budget_scales, genre_scales
       top20_moviebyCountry.push(nested_countries[i]);
   }
   
-  top20_moviebyCountry.push({key:'Others',value:636});
-  top20_moviebyCountry[0]['value'] = 700;
+  top20_moviebyCountry.push({key:'Others',value:other_counts});
+  top20_moviebyCountry[0].value = (top20_moviebyCountry[0].value)/4.5;
+
 
   top20_moviebyCountry.sort(function(a,b){return d3.descending(a.value,b.value);});
   var countries = top20_moviebyCountry.map(d=>d.key);
+
+  console.log(top20_moviebyCountry)
 
 
   //RECTANGLES for countries
@@ -609,10 +619,12 @@ function generate_country_plot(movie_data, plot_dim, budget_scales, genre_scales
   d3.select('#country').append('text').text('Production Country')
     .attr('transform', 'translate('+(plot_dim/2)+','+(plot_dim+90)+')').attr('text-anchor', 'middle').attr('fill', '#000').attr('font-size', '13px')
 
-  d3.select('#country').append('text').text('*"U.S." include 2.9k+ movies')
-    .attr('transform', 'translate('+(plot_dim - 145)+', 8)').attr('fill', '#000').attr('font-size', '9px')
+  d3.select('#country').append('text').text('*"U.S." include 2.9k+ movies.').attr('transform', 'translate('+(plot_dim - 145)+', 8)').attr('fill', '#000').attr('font-size', '9px')
 
-    click_interaction_country(d3.select('#country').selectAll('rect'), movie_data, {'xscale':budget_scales.xscale,'yscale':budget_scales.yscale}, {'xscale':genre_scales.xscale,'yscale':genre_scales.yscale}, {'xscale':company_scales.xscale,'yscale':company_scales.yscale}, {'xscale':country_scales.xscale,'yscale':country_scales.yscale}, {'xscale':time_scales.xscale,'yscale':time_scales.yscale}, {'xscale':scatter_scales.xscale,'yscale':scatter_scales.yscale}, plot_dim);
+  d3.select('#country').append('text').text('It\'s not proportional to the other bars.')
+    .attr('transform', 'translate('+(plot_dim - 145)+',15)').attr('fill', '#000').attr('font-size', '9px')
+
+  click_interaction_country(d3.select('#country').selectAll('rect'), movie_data, {'xscale':budget_scales.xscale,'yscale':budget_scales.yscale}, {'xscale':genre_scales.xscale,'yscale':genre_scales.yscale}, {'xscale':company_scales.xscale,'yscale':company_scales.yscale}, {'xscale':country_scales.xscale,'yscale':country_scales.yscale}, {'xscale':time_scales.xscale,'yscale':time_scales.yscale}, {'xscale':scatter_scales.xscale,'yscale':scatter_scales.yscale}, plot_dim);
 
     
 }
@@ -655,8 +667,6 @@ function generate_scatter_plot(movie_data, plot_dim, scales){
   if(element != null){
     element.parentNode.removeChild(element);
   }
-
-  
 
   //DOTS for scatter
     d3.select('#scatter').append('g').attr('id', 'scatter_dots')
@@ -708,7 +718,7 @@ function mouse_interaction_axis(all_circles, axis_group, scales, rect_elem)  {
 }
 
 function click_interaction_budget(all_rectangles, movie_data, budget_scales, genre_scales, company_scales, country_scales, time_scales, scatter_scales, plot_dim)  {
-	all_rectangles.on('click', function(d)  {
+  all_rectangles.on('click', function(d)  {
     d3.select(this).attr('fill', 'orange')
     interval = d.key;
     var res = interval.split("-");
@@ -746,7 +756,7 @@ function click_interaction_budget(all_rectangles, movie_data, budget_scales, gen
 }
 
 function click_interaction_genre(all_rectangles, movie_data, budget_scales, genre_scales, company_scales, country_scales, time_scales, scatter_scales, plot_dim)  {
-	all_rectangles.on('click', function(d)  {
+  all_rectangles.on('click', function(d)  {
     d3.select(this).attr('fill', 'red')
     interval = d.key;
     var found = false
@@ -790,7 +800,7 @@ function click_interaction_genre(all_rectangles, movie_data, budget_scales, genr
 
 
 function click_interaction_company(all_rectangles, movie_data, budget_scales, genre_scales, company_scales, country_scales, time_scales, scatter_scales, plot_dim)  {
-	all_rectangles.on('click', function(d)  {
+  all_rectangles.on('click', function(d)  {
     d3.select(this).attr('fill', 'green')
     interval = d.key;
     var found = false
@@ -812,9 +822,11 @@ function click_interaction_company(all_rectangles, movie_data, budget_scales, ge
           z += 6;
           }
         for(let company of company_types){
-          if(company == global_company_intervals[i] && noncompany_filtered_IDS.includes(movie_data[j].id) && !filtered_IDS.includes(movie_data[j].id)){
-            filtered_data.push(movie_data[j]);
-            filtered_IDS.push(movie_data[j].id);
+          if(company == global_company_intervals[i] || (!top20_companies.includes(company) && global_company_intervals.includes('Others'))){
+            if (noncompany_filtered_IDS.includes(movie_data[j].id) && !filtered_IDS.includes(movie_data[j].id)){
+              filtered_data.push(movie_data[j]);
+              filtered_IDS.push(movie_data[j].id);
+            }
           }
         }
       }
@@ -833,7 +845,7 @@ function click_interaction_company(all_rectangles, movie_data, budget_scales, ge
 }
 
 function click_interaction_country(all_rectangles, movie_data, budget_scales, genre_scales, company_scales, country_scales, time_scales, scatter_scales, plot_dim)  {
-	all_rectangles.on('click', function(d)  {
+  all_rectangles.on('click', function(d)  {
     d3.select(this).attr('fill', 'purple')
     interval = d.key;
     var found = false
@@ -855,9 +867,11 @@ function click_interaction_country(all_rectangles, movie_data, budget_scales, ge
           z += 8;
         }
         for(let country of country_types){
-          if(country == global_country_intervals[i] && noncountry_filtered_IDS.includes(movie_data[j].id) && !filtered_IDS.includes(movie_data[j].id)){
-            filtered_data.push(movie_data[j]);
-            filtered_IDS.push(movie_data[j].id);
+          if(country == global_country_intervals[i] || (!top20_countries.includes(country) && global_country_intervals.includes('Others'))){
+            if(noncountry_filtered_IDS.includes(movie_data[j].id) && !filtered_IDS.includes(movie_data[j].id)){
+              filtered_data.push(movie_data[j]);
+              filtered_IDS.push(movie_data[j].id);
+            }
           }
         }
       }
@@ -876,7 +890,7 @@ function click_interaction_country(all_rectangles, movie_data, budget_scales, ge
   });
 }
 function click_interaction_time(all_rectangles, movie_data, budget_scales, genre_scales, company_scales, country_scales, time_scales, scatter_scales, plot_dim)  {
-	all_rectangles.on('click', function(d)  {
+  all_rectangles.on('click', function(d)  {
     d3.select(this).attr('fill', 'yellow')
     interval = d.key;
     var found = false
